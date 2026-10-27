@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>document</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-purple-700 via-pink-100 to-blue-100 p-5">
+  <div class="max-w-3xl mx-auto mt-10">
+    <h1 class="text-4xl font-extrabold text-center text-purple-800 mb-2">
+      Joke Generator
+    </h1>
+
+    <p class="text-center text-red-700 mb-8">Get ready to laugh!</p>
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 text-center border border-purple-100">
+      <h1 id="setup" class="text-xl md:text-2xl font-semibold text-red-800 mb-6"></h1>
+
+      <div class="border-t border-dashed border-gray-300 my-5"></div>
+
+      <h2 id="punchline" class="text-lg md:text-xl text-red-700 mb-8"></h2>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <button onclick="getData()"
+          class="bg-purple-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition duration-300 hover:scale-105">
+          Generate Now
+        </button>
+
+        <button onclick="AddtoFav()"
+          class="bg-pink-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition duration-300 hover:scale-105">
+          Add to Fav
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-10 bg-white rounded-2xl shadow-lg p-5 md:p-7">
+      <h2 class="text-2xl font-bold text-purple-900 mb-5">
+        Favourite Jokes 
+      </h2>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-purple-100 text-purple-900">
+              <th class="p-3 border border-purple-200">Setup</th>
+              <th class="p-3 border border-purple-200">Punchline</th>
+              <th class="p-3 border border-purple-200">Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="result" class="text-gray-700">
+            <tr>
+              <td class="p-3 border border-gray-200">1</td>
+              <td class="p-3 border border-gray-200">2</td>
+              <td class="p-3 border border-gray-200">
+                <button onclick="deleteData($`{eachData.punchline}`)"
+                  class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  let apiResponse = null;
+  let favData = JSON.parse(localStorage.getItem("data")) || [];
+
+  const getData = async () => {
+    try {
+      apiResponse = await fetch(
+        "https://official-joke-api.appspot.com/random_joke",
+      );
+      apiResponse = await apiResponse.json();
+      console.log(apiResponse);
+
+      document.getElementById("setup").innerText = apiResponse.setup;
+      document.getElementById("punchline").innerText = apiResponse.punchline;
+    } catch (error) {
+      console.log(error);
+      alert("error occured");
+    }
+  };
+
+  getData();
+
+  const AddtoFav = () => {
+    favData.unshift(apiResponse);
+
+    let jsonData = JSON.stringify(favData);
+    localStorage.setItem("data", jsonData);
+    showFavData();
+    alert("added");
+  };
+
+  const showFavData = () => {
+    favData = JSON.parse(localStorage.getItem("data")) || [];
+    let resultE1 = document.getElementById("result");
+
+    resultE1.innerHTML = "";
+
+    favData.map(
+      (eachData) =>
+      (resultE1.innerHTML += ` <tr>
+                    <td class="p-3 border border-gray-200">${eachData.setup}</td>
+                    <td class="p-3 border border-gray-200">${eachData.punchline}</td>
+                    <td class="p-3 border border-gray-200">
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg" onclick="deleteData('${eachData.punchline}')">Delete</button>
+                    </td>
+                </tr>`),
+    );
+  };
+
+  showFavData();
+
+  const deleteData = (dpunchline) => {
+    favData = JSON.parse(localStorage.getItem("data")) || [];
+
+    let filteredData = favData.filter(
+      (eachData) => eachData.punchline != dpunchline,
+    );
+
+    localStorage.setItem("data", JSON.stringify(filteredData));
+
+    alert("deleted");
+    showFavData();
+  };
+</script>
+
+</html>
